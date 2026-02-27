@@ -270,6 +270,17 @@ class _WalletCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Kullanılabilir: ${Formatters.formatCoin(summary.availableBalance)}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
                   const Spacer(),
                   // Bottom row: tier name + exchange rate
                   Row(

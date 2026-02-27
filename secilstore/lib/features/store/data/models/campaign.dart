@@ -11,6 +11,7 @@ class Campaign with _$Campaign {
     required String description,
     required bool isCombinable,
     required DateTime endDate,
+    String? imageUrl,
     String? brandLogoUrl,
     String? discountLabel,
     @Default(true) bool isActive,

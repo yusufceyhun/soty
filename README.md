@@ -1,23 +1,15 @@
 # soty
 
-Production-grade Flutter implementation of the **SeçilStore Mobile Case Study**.
+SeçilStore Flutter mobile case study implementation with production-grade architecture and API-first behavior.
 
-This repository contains a full end-to-end mobile experience: OTP authentication, wallet transactions, pending rewards flow, campaign selection logic, and QR/barcode payment generation.
+## Scope
 
-## Repository Structure
+- OTP authentication flow (`/login` -> `/otp` -> `/wallet`)
+- Wallet summary, filtered transactions, pending rewards
+- Store campaign selection with combinable/non-combinable business rules
+- Payment QR/Barcode generation with 60-second refresh cycle
 
-- `secilstore/` — Flutter app source code (feature-first architecture)
-
-## Engineering Principles
-
-- Clean architecture boundaries: `UI -> Provider/Notifier -> Repository -> Network`
-- Strong typing and immutable models (`Freezed`)
-- Explicit error mapping (`DioException -> AppException`)
-- Secure token handling (`flutter_secure_storage`)
-- Testable state logic (Riverpod providers/notifiers)
-- Production safety defaults (debug logs and Firebase guarded by runtime flags)
-
-## Stack
+## Tech Stack
 
 - Flutter 3.16+
 - Dart 3.2+
@@ -28,7 +20,33 @@ This repository contains a full end-to-end mobile experience: OTP authentication
 - Firebase Analytics / Crashlytics / Remote Config
 - qr_flutter / barcode_widget
 
-## Quick Start
+## Architecture
+
+- Feature-first structure under `secilstore/lib/features`
+- Layering: `UI -> Notifier/Provider -> Repository -> Network`
+- Domain models are immutable (`Freezed`)
+- Typed error mapping (`DioException -> AppException`)
+- Token storage via `flutter_secure_storage`
+
+## API Contracts (Postman-aligned)
+
+Postman collection path: `secilstore/.project_docs/postman_collection.json`
+
+- `POST /Mobile/v1/Auth/SignIn`
+- `GET /Mobile/v1/Wallet/Brands/{brandId}/Summary`
+- `GET /Mobile/v1/Wallet/Brands/{brandId}/Transactions?FilterType={1|2|3}`
+- `POST /Mobile/v1/Sotier/GetWaitingRewardCoin`
+- `GET /Mobile/v1/Campaign/GetActiveCampaign/{brandId}`
+- `POST /Mobile/v1/Campaign/GeneratePaymentQrCodeWithSotyCoinsAndCampaigns`
+
+## Data Semantics
+
+- `totalAvailableCoin`: total wallet coin
+- `totalAvailableTransferCoin`: spendable/transferable coin
+
+The app renders both values explicitly to avoid ambiguity in wallet, store, and profile flows.
+
+## Local Setup
 
 ```bash
 cd secilstore
@@ -42,7 +60,7 @@ Test credentials:
 - Phone: `905998881122`
 - OTP: `111111`
 
-## Quality Gates
+## Verification
 
 ```bash
 cd secilstore

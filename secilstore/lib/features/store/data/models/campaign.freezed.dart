@@ -25,6 +25,7 @@ mixin _$Campaign {
   String get description => throw _privateConstructorUsedError;
   bool get isCombinable => throw _privateConstructorUsedError;
   DateTime get endDate => throw _privateConstructorUsedError;
+  String? get imageUrl => throw _privateConstructorUsedError;
   String? get brandLogoUrl => throw _privateConstructorUsedError;
   String? get discountLabel => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
@@ -50,6 +51,7 @@ abstract class $CampaignCopyWith<$Res> {
       String description,
       bool isCombinable,
       DateTime endDate,
+      String? imageUrl,
       String? brandLogoUrl,
       String? discountLabel,
       bool isActive});
@@ -75,6 +77,7 @@ class _$CampaignCopyWithImpl<$Res, $Val extends Campaign>
     Object? description = null,
     Object? isCombinable = null,
     Object? endDate = null,
+    Object? imageUrl = freezed,
     Object? brandLogoUrl = freezed,
     Object? discountLabel = freezed,
     Object? isActive = null,
@@ -100,6 +103,10 @@ class _$CampaignCopyWithImpl<$Res, $Val extends Campaign>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       brandLogoUrl: freezed == brandLogoUrl
           ? _value.brandLogoUrl
           : brandLogoUrl // ignore: cast_nullable_to_non_nullable
@@ -130,6 +137,7 @@ abstract class _$$CampaignImplCopyWith<$Res>
       String description,
       bool isCombinable,
       DateTime endDate,
+      String? imageUrl,
       String? brandLogoUrl,
       String? discountLabel,
       bool isActive});
@@ -153,6 +161,7 @@ class __$$CampaignImplCopyWithImpl<$Res>
     Object? description = null,
     Object? isCombinable = null,
     Object? endDate = null,
+    Object? imageUrl = freezed,
     Object? brandLogoUrl = freezed,
     Object? discountLabel = freezed,
     Object? isActive = null,
@@ -178,6 +187,10 @@ class __$$CampaignImplCopyWithImpl<$Res>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      imageUrl: freezed == imageUrl
+          ? _value.imageUrl
+          : imageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       brandLogoUrl: freezed == brandLogoUrl
           ? _value.brandLogoUrl
           : brandLogoUrl // ignore: cast_nullable_to_non_nullable
@@ -203,6 +216,7 @@ class _$CampaignImpl implements _Campaign {
       required this.description,
       required this.isCombinable,
       required this.endDate,
+      this.imageUrl,
       this.brandLogoUrl,
       this.discountLabel,
       this.isActive = true});
@@ -221,6 +235,8 @@ class _$CampaignImpl implements _Campaign {
   @override
   final DateTime endDate;
   @override
+  final String? imageUrl;
+  @override
   final String? brandLogoUrl;
   @override
   final String? discountLabel;
@@ -230,7 +246,7 @@ class _$CampaignImpl implements _Campaign {
 
   @override
   String toString() {
-    return 'Campaign(id: $id, name: $name, description: $description, isCombinable: $isCombinable, endDate: $endDate, brandLogoUrl: $brandLogoUrl, discountLabel: $discountLabel, isActive: $isActive)';
+    return 'Campaign(id: $id, name: $name, description: $description, isCombinable: $isCombinable, endDate: $endDate, imageUrl: $imageUrl, brandLogoUrl: $brandLogoUrl, discountLabel: $discountLabel, isActive: $isActive)';
   }
 
   @override
@@ -245,6 +261,8 @@ class _$CampaignImpl implements _Campaign {
             (identical(other.isCombinable, isCombinable) ||
                 other.isCombinable == isCombinable) &&
             (identical(other.endDate, endDate) || other.endDate == endDate) &&
+            (identical(other.imageUrl, imageUrl) ||
+                other.imageUrl == imageUrl) &&
             (identical(other.brandLogoUrl, brandLogoUrl) ||
                 other.brandLogoUrl == brandLogoUrl) &&
             (identical(other.discountLabel, discountLabel) ||
@@ -256,7 +274,7 @@ class _$CampaignImpl implements _Campaign {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, name, description,
-      isCombinable, endDate, brandLogoUrl, discountLabel, isActive);
+      isCombinable, endDate, imageUrl, brandLogoUrl, discountLabel, isActive);
 
   /// Create a copy of Campaign
   /// with the given fields replaced by the non-null parameter values.
@@ -281,6 +299,7 @@ abstract class _Campaign implements Campaign {
       required final String description,
       required final bool isCombinable,
       required final DateTime endDate,
+      final String? imageUrl,
       final String? brandLogoUrl,
       final String? discountLabel,
       final bool isActive}) = _$CampaignImpl;
@@ -298,6 +317,8 @@ abstract class _Campaign implements Campaign {
   bool get isCombinable;
   @override
   DateTime get endDate;
+  @override
+  String? get imageUrl;
   @override
   String? get brandLogoUrl;
   @override

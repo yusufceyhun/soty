@@ -46,26 +46,9 @@ class CampaignCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Brand logo
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: campaign.brandLogoUrl != null &&
-                            campaign.brandLogoUrl!.isNotEmpty
-                        ? Image.network(
-                            campaign.brandLogoUrl!,
-                            height: 32,
-                            width: 88,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                              Icons.storefront_outlined,
-                              color: AppColors.textSecondary,
-                            ),
-                          )
-                        : const Icon(
-                            Icons.storefront_outlined,
-                            color: AppColors.textSecondary,
-                          ),
+                  _CampaignImage(
+                    imageUrl: campaign.imageUrl,
+                    fallbackLogoUrl: campaign.brandLogoUrl,
                   ),
                   // Combinable badge with ⓘ icon
                   Row(
@@ -218,6 +201,48 @@ class CampaignCard extends StatelessWidget {
                 ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CampaignImage extends StatelessWidget {
+  const _CampaignImage({
+    required this.imageUrl,
+    required this.fallbackLogoUrl,
+  });
+
+  final String? imageUrl;
+  final String? fallbackLogoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedUrl = (imageUrl != null && imageUrl!.isNotEmpty)
+        ? imageUrl!
+        : (fallbackLogoUrl != null && fallbackLogoUrl!.isNotEmpty)
+            ? fallbackLogoUrl!
+            : null;
+
+    if (resolvedUrl == null) {
+      return const Icon(
+        Icons.storefront_outlined,
+        color: AppColors.textSecondary,
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: SizedBox(
+        width: 88,
+        height: 40,
+        child: Image.network(
+          resolvedUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => const Icon(
+            Icons.storefront_outlined,
+            color: AppColors.textSecondary,
           ),
         ),
       ),

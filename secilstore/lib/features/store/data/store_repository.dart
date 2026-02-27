@@ -73,6 +73,10 @@ class StoreRepository {
           json['IsCombinable'] as bool? ??
           true,
       endDate: _parseEndDate(json),
+      imageUrl: json['image'] as String? ??
+          json['Image'] as String? ??
+          json['imageUrl'] as String? ??
+          json['ImageUrl'] as String?,
       brandLogoUrl: json['brandLogoUrl'] as String? ??
           json['BrandLogoUrl'] as String? ??
           json['image'] as String? ??
@@ -89,7 +93,7 @@ class StoreRepository {
     final parsed = DateTime.tryParse(raw);
 
     if (parsed == null || parsed.year <= 1) {
-      return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+      return DateTime.utc(1, 1, 1);
     }
     return parsed;
   }

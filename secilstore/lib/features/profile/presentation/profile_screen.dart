@@ -141,6 +141,14 @@ class ProfileScreen extends ConsumerWidget {
                             color: AppColors.textSecondary,
                           ),
                         ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          'Kullanılabilir Soty Coin: ${Formatters.formatCoin(summary.availableBalance)}',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
                         if (summary.tierName != null) ...[
                           const SizedBox(height: AppSpacing.md),
                           Container(
