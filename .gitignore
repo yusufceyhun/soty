@@ -1,0 +1,10 @@
+# Project planning & tracking files (local only)
+product_bible.md
+case_study.md
+TODO.md
+context_v*.md
+run.txt
+postman_collection.json
+
+.project_docs/
+.DS_Store
