@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/error/app_exception.dart';
+import '../../../core/services/remote_config_service.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/coin_icon.dart';
@@ -46,15 +47,17 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       ref.read(paymentNotifierProvider.notifier).generateCode(
             coinAmount: widget.coinAmount,
             campaignIds: widget.campaignIds,
+            trigger: 'initial',
           );
     });
   }
 
-  void _refresh() {
+  void _refresh(String trigger) {
     if (!_hasSelectionPayload) return;
     ref.read(paymentNotifierProvider.notifier).manualRefresh(
           coinAmount: widget.coinAmount,
           campaignIds: widget.campaignIds,
+          trigger: trigger,
         );
     _timerKey.currentState?.restart();
   }
@@ -146,7 +149,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                       message: e is AppException
                           ? e.userMessage
                           : 'Birleştirme için en az bir kampanya\nveya coin miktarı belirtilmelidir.',
-                      onRetry: _refresh,
+                      onRetry: () => _refresh('manual_retry'),
                     ),
                     data: (paymentCode) {
                       if (paymentCode == null) {
@@ -162,7 +165,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                         timerKey: _timerKey,
                         coinAmount: widget.coinAmount,
                         campaignNames: widget.campaignNames,
-                        onRefresh: _refresh,
+                        onAutoRefresh: () => _refresh('auto_expired'),
+                        onManualRefresh: () => _refresh('manual_button'),
                         onCopy: _copyCode,
                       );
                     },
@@ -294,7 +298,8 @@ class _SuccessBody extends StatelessWidget {
     required this.timerKey,
     required this.coinAmount,
     required this.campaignNames,
-    required this.onRefresh,
+    required this.onAutoRefresh,
+    required this.onManualRefresh,
     required this.onCopy,
   });
 
@@ -303,7 +308,8 @@ class _SuccessBody extends StatelessWidget {
   final GlobalKey<CodeCountdownTimerState> timerKey;
   final double? coinAmount;
   final List<String> campaignNames;
-  final VoidCallback onRefresh;
+  final VoidCallback onAutoRefresh;
+  final VoidCallback onManualRefresh;
   final ValueChanged<String> onCopy;
 
   @override
@@ -357,14 +363,14 @@ class _SuccessBody extends StatelessWidget {
           // Timer
           CodeCountdownTimer(
             key: timerKey,
-            onExpired: onRefresh,
-            onRefresh: onRefresh,
+            onExpired: onAutoRefresh,
+            onRefresh: onManualRefresh,
           ),
           const SizedBox(height: AppSpacing.md),
           // Refresh button
           AppButton(
             label: 'Kodu Yenile',
-            onPressed: onRefresh,
+            onPressed: onManualRefresh,
           ),
           const SizedBox(height: AppSpacing.lg),
           // Coin summary
@@ -457,7 +463,7 @@ class _SuccessBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           // Info text
           Text(
-            'Bu kodu kasadaki personele gösteriniz.\nKod her 60 saniyede otomatik yenilenir.',
+            'Bu kodu kasadaki personele gösteriniz.\nKod her ${RemoteConfigService.qrRefreshInterval} saniyede otomatik yenilenir.',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.textSecondary,
             ),

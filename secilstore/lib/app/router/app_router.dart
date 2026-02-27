@@ -15,6 +15,8 @@ import '../../features/home/presentation/placeholder_screen.dart';
 import '../../features/payment/presentation/payment_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/store/presentation/store_screen.dart';
+import '../../features/wallet/data/models/pending_transaction.dart';
+import '../../features/wallet/presentation/pending_transaction_detail_screen.dart';
 import '../../features/wallet/presentation/wallet_screen.dart';
 
 part 'app_router.g.dart';
@@ -35,6 +37,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String store = '/store';
   static const String payment = '/payment';
+  static const String pendingDetail = '/pending-detail';
 }
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -196,6 +199,31 @@ GoRouter appRouter(Ref ref) {
                     .toList()
                 : const <String>[],
           );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.pendingDetail,
+        builder: (context, state) {
+          final extra = state.extra;
+          PendingTransaction? transaction;
+          if (extra is PendingTransaction) {
+            transaction = extra;
+          } else if (extra is Map<String, dynamic>) {
+            try {
+              transaction = PendingTransaction.fromJson(extra);
+            } catch (_) {
+              transaction = null;
+            }
+          }
+
+          if (transaction == null) {
+            return const PlaceholderScreen(
+              title: 'İşlem Detayı',
+              icon: Icons.receipt_long_outlined,
+            );
+          }
+
+          return PendingTransactionDetailScreen(transaction: transaction);
         },
       ),
     ],

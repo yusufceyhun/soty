@@ -10,6 +10,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/error/app_exception.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_button.dart';
 import '../providers/auth_providers.dart';
@@ -89,6 +90,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         .verifyOtp(widget.phone, code);
 
     if (success && mounted) {
+      await AnalyticsService.logLogin();
+      if (!mounted) return;
       context.go(AppRoutes.wallet);
       return;
     }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
@@ -45,60 +47,78 @@ class _PendingTransactionItemState
       ),
       child: Column(
         children: [
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.hourglass_bottom,
-                    size: 28,
-                    color: AppColors.pending,
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: AppTextStyles.titleMedium.copyWith(
-                            color: AppColors.textPrimary,
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.hourglass_bottom,
+                  size: 28,
+                  color: AppColors.pending,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => context.push(
+                      AppRoutes.pendingDetail,
+                      extra: tx,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.xs,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        TransactionCountdownTimer(
-                          estimatedDate: tx.estimatedDate,
-                          onExpire: () {
-                            // Re-fetch both pending and ledger lists so expired items
-                            // can move out of "Bekleyen" into earnings.
-                            ref.invalidate(walletSummaryProvider);
-                            ref.invalidate(pendingTransactionsDataProvider);
-                            ref.invalidate(pendingTransactionsProvider);
-                            ref.invalidate(transactionsProvider);
-                          },
-                        ),
-                      ],
+                          const SizedBox(height: AppSpacing.sm),
+                          TransactionCountdownTimer(
+                            estimatedDate: tx.estimatedDate,
+                            onExpire: () {
+                              // Re-fetch both pending and ledger lists so expired items
+                              // can move out of "Bekleyen" into earnings.
+                              ref.invalidate(walletSummaryProvider);
+                              ref.invalidate(pendingTransactionsDataProvider);
+                              ref.invalidate(pendingTransactionsProvider);
+                              ref.invalidate(transactionsProvider);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  Text(
-                    Formatters.formatCoinWithSign(tx.amount),
-                    style: AppTextStyles.titleMedium.copyWith(
-                      color: AppColors.pending,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      Formatters.formatCoinWithSign(tx.amount),
+                      style: AppTextStyles.titleMedium.copyWith(
+                        color: AppColors.pending,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Icon(
-                    _isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
-              ),
+                    IconButton(
+                      tooltip: _isExpanded ? 'Detayı Kapat' : 'Detayı Aç',
+                      onPressed: () =>
+                          setState(() => _isExpanded = !_isExpanded),
+                      icon: Icon(
+                        _isExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           if (_isExpanded && subItems.isNotEmpty)

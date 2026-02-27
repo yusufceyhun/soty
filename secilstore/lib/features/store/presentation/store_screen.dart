@@ -7,6 +7,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/error/app_exception.dart';
+import '../../../core/services/analytics_service.dart';
+import '../../../core/services/remote_config_service.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_error_widget.dart';
 import '../../../core/widgets/empty_state_widget.dart';
@@ -30,6 +32,9 @@ class StoreScreen extends ConsumerWidget {
     final availableBalance = summaryAsync.valueOrNull?.availableBalance ?? 0;
     final hasSelection = selectionState.selectedCampaigns.isNotEmpty ||
         selectionState.coinAmount > 0;
+    final maxCampaignSelection = RemoteConfigService.maxCampaignSelection > 0
+        ? RemoteConfigService.maxCampaignSelection
+        : 1;
 
     return Scaffold(
       appBar: AppBar(
@@ -172,6 +177,7 @@ class StoreScreen extends ConsumerWidget {
                               context,
                               ref,
                               campaign,
+                              maxCampaignSelection: maxCampaignSelection,
                             ),
                           );
                         }).toList(),
@@ -229,13 +235,36 @@ class StoreScreen extends ConsumerWidget {
   }
 
   Future<void> _handleToggle(
-    BuildContext context,
-    WidgetRef ref,
-    Campaign campaign,
-  ) async {
+      BuildContext context, WidgetRef ref, Campaign campaign,
+      {required int maxCampaignSelection}) async {
+    final currentState = ref.read(storeSelectionNotifierProvider);
+    final isAlreadySelected = currentState.selectedCampaigns
+        .any((selectedCampaign) => selectedCampaign.id == campaign.id);
+
+    if (!isAlreadySelected &&
+        currentState.selectedCampaigns.length >= maxCampaignSelection) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'En fazla $maxCampaignSelection kampanya seçebilirsiniz.',
+          ),
+          backgroundColor: AppColors.negative,
+        ),
+      );
+      return;
+    }
+
     final conflict = ref
         .read(storeSelectionNotifierProvider.notifier)
         .toggleCampaign(campaign);
+
+    if (conflict == null && !isAlreadySelected) {
+      await AnalyticsService.logSelectCampaign(
+        campaignId: campaign.id,
+        isCombinable: campaign.isCombinable,
+      );
+      return;
+    }
 
     if (conflict != null) {
       final confirmed = await CampaignConflictDialog.show(
@@ -247,6 +276,10 @@ class StoreScreen extends ConsumerWidget {
         ref
             .read(storeSelectionNotifierProvider.notifier)
             .confirmConflictResolution();
+        await AnalyticsService.logSelectCampaign(
+          campaignId: campaign.id,
+          isCombinable: campaign.isCombinable,
+        );
       } else {
         ref.read(storeSelectionNotifierProvider.notifier).cancelConflict();
       }

@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/error/app_exception.dart';
 import '../../../core/providers/core_providers.dart';
+import '../../../core/services/analytics_service.dart';
 import '../data/models/payment_code.dart';
 import '../data/payment_repository.dart';
 
@@ -21,6 +22,7 @@ class PaymentNotifier extends _$PaymentNotifier {
   Future<void> generateCode({
     double? coinAmount,
     required List<String> campaignIds,
+    String trigger = 'initial',
   }) async {
     state = const AsyncLoading();
 
@@ -31,6 +33,13 @@ class PaymentNotifier extends _$PaymentNotifier {
                 campaignIds: campaignIds,
               );
       state = AsyncData(code);
+      await AnalyticsService.logGenerateQr(
+        campaignCount: campaignIds.length,
+        coinAmount: coinAmount ?? 0,
+      );
+      if (trigger != 'initial') {
+        await AnalyticsService.logQrRefresh(trigger: trigger);
+      }
     } on AppException catch (e, st) {
       state = AsyncError(e, st);
     } catch (e, st) {
@@ -41,7 +50,12 @@ class PaymentNotifier extends _$PaymentNotifier {
   void manualRefresh({
     double? coinAmount,
     required List<String> campaignIds,
+    String trigger = 'manual',
   }) {
-    generateCode(coinAmount: coinAmount, campaignIds: campaignIds);
+    generateCode(
+      coinAmount: coinAmount,
+      campaignIds: campaignIds,
+      trigger: trigger,
+    );
   }
 }

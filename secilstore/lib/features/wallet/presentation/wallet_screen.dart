@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +9,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/error/app_exception.dart';
+import '../../../core/services/analytics_service.dart';
+import '../../../core/services/remote_config_service.dart';
 import '../../../core/widgets/app_error_widget.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/loading_shimmer.dart';
@@ -21,13 +25,28 @@ import 'widgets/transaction_list_item.dart';
 import 'widgets/transaction_tab_bar.dart';
 import 'widgets/wallet_card_widget.dart';
 
-class WalletScreen extends ConsumerWidget {
+class WalletScreen extends ConsumerStatefulWidget {
   const WalletScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WalletScreen> createState() => _WalletScreenState();
+}
+
+class _WalletScreenState extends ConsumerState<WalletScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(AnalyticsService.logViewWallet());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = this.ref;
     final summaryAsync = ref.watch(walletSummaryProvider);
     final tabIndex = ref.watch(walletTabNotifierProvider);
+    final showOnlineShopping = RemoteConfigService.showOnlineShopping;
 
     return Scaffold(
       appBar: AppBar(
@@ -99,29 +118,40 @@ class WalletScreen extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.md,
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: ShortcutTile(
-                                  icon: Icons.language,
-                                  label: 'Online',
-                                  labelBold: 'Alışveriş',
-                                  campaignCount: summary.onlineCampaignCount,
-                                  onTap: () {},
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: ShortcutTile(
+                          child: showOnlineShopping
+                              ? Row(
+                                  children: [
+                                    Expanded(
+                                      child: ShortcutTile(
+                                        icon: Icons.language,
+                                        label: 'Online',
+                                        labelBold: 'Alışveriş',
+                                        campaignCount:
+                                            summary.onlineCampaignCount,
+                                        onTap: () {},
+                                      ),
+                                    ),
+                                    const SizedBox(width: AppSpacing.md),
+                                    Expanded(
+                                      child: ShortcutTile(
+                                        icon: Icons.storefront,
+                                        label: 'Mağaza',
+                                        labelBold: 'Alışverişi',
+                                        campaignCount:
+                                            summary.storeCampaignCount,
+                                        onTap: () =>
+                                            context.push(AppRoutes.store),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : ShortcutTile(
                                   icon: Icons.storefront,
                                   label: 'Mağaza',
                                   labelBold: 'Alışverişi',
                                   campaignCount: summary.storeCampaignCount,
                                   onTap: () => context.push(AppRoutes.store),
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ) ??
                       const SizedBox.shrink(),

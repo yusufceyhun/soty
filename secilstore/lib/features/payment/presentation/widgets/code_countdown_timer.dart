@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/services/remote_config_service.dart';
 
 class CodeCountdownTimer extends StatefulWidget {
   const CodeCountdownTimer({
@@ -23,11 +23,14 @@ class CodeCountdownTimer extends StatefulWidget {
 
 class CodeCountdownTimerState extends State<CodeCountdownTimer> {
   Timer? _timer;
-  int _remaining = AppConstants.qrRefreshSecs;
+  int _refreshIntervalSeconds = 60;
+  int _remaining = 60;
 
   @override
   void initState() {
     super.initState();
+    _refreshIntervalSeconds = _safeRefreshInterval();
+    _remaining = _refreshIntervalSeconds;
     _startTimer();
   }
 
@@ -40,8 +43,14 @@ class CodeCountdownTimerState extends State<CodeCountdownTimer> {
   void restart() {
     _timer?.cancel();
     if (!mounted) return;
-    setState(() => _remaining = AppConstants.qrRefreshSecs);
+    setState(() => _remaining = _refreshIntervalSeconds);
     _startTimer();
+  }
+
+  int _safeRefreshInterval() {
+    final value = RemoteConfigService.qrRefreshInterval;
+    if (value <= 0) return 60;
+    return value;
   }
 
   void _startTimer() {
@@ -62,7 +71,7 @@ class CodeCountdownTimerState extends State<CodeCountdownTimer> {
 
   @override
   Widget build(BuildContext context) {
-    final progress = _remaining / AppConstants.qrRefreshSecs;
+    final progress = _remaining / _refreshIntervalSeconds;
     final isLow = _remaining <= 10;
 
     return Column(
