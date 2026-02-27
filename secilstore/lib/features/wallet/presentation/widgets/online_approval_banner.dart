@@ -41,7 +41,9 @@ class OnlineApprovalBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '$approvalDurationDays Gün',
+                  approvalDurationDays > 0
+                      ? '$approvalDurationDays Gün'
+                      : 'Süre bilgisi bulunamadı',
                   style: AppTextStyles.titleLarge.copyWith(
                     color: AppColors.pending,
                   ),

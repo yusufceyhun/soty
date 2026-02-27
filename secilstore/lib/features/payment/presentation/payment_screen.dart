@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/router/app_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_text_styles.dart';
@@ -34,10 +35,13 @@ class PaymentScreen extends ConsumerStatefulWidget {
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   final _timerKey = GlobalKey<CodeCountdownTimerState>();
   bool _showBarcode = false;
+  bool get _hasSelectionPayload =>
+      (widget.coinAmount ?? 0) > 0 || widget.campaignIds.isNotEmpty;
 
   @override
   void initState() {
     super.initState();
+    if (!_hasSelectionPayload) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(paymentNotifierProvider.notifier).generateCode(
             coinAmount: widget.coinAmount,
@@ -47,6 +51,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   }
 
   void _refresh() {
+    if (!_hasSelectionPayload) return;
     ref.read(paymentNotifierProvider.notifier).manualRefresh(
           coinAmount: widget.coinAmount,
           campaignIds: widget.campaignIds,
@@ -124,35 +129,44 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           const SizedBox(height: AppSpacing.lg),
           // Main content — switches based on state
           Expanded(
-            child: codeState.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-              error: (e, _) => _ErrorBody(
-                message: e is AppException
-                    ? e.userMessage
-                    : 'Birleştirme için en az bir kampanya\nveya coin miktarı belirtilmelidir.',
-                onRetry: _refresh,
-              ),
-              data: (paymentCode) {
-                if (paymentCode == null) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
+            child: !_hasSelectionPayload
+                ? _ErrorBody(
+                    message:
+                        'Önce mağaza sayfasından kampanya veya coin seçimi yapın.',
+                    onRetry: () => context.go(AppRoutes.store),
+                    actionLabel: 'Mağazaya Git',
+                    actionIcon: Icons.storefront_outlined,
+                  )
+                : codeState.when(
+                    loading: () => const Center(
+                      child:
+                          CircularProgressIndicator(color: AppColors.primary),
                     ),
-                  );
-                }
-                return _SuccessBody(
-                  paymentCode: paymentCode.code,
-                  showBarcode: _showBarcode,
-                  timerKey: _timerKey,
-                  coinAmount: widget.coinAmount,
-                  campaignNames: widget.campaignNames,
-                  onRefresh: _refresh,
-                  onCopy: _copyCode,
-                );
-              },
-            ),
+                    error: (e, _) => _ErrorBody(
+                      message: e is AppException
+                          ? e.userMessage
+                          : 'Birleştirme için en az bir kampanya\nveya coin miktarı belirtilmelidir.',
+                      onRetry: _refresh,
+                    ),
+                    data: (paymentCode) {
+                      if (paymentCode == null) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                        );
+                      }
+                      return _SuccessBody(
+                        paymentCode: paymentCode.code,
+                        showBarcode: _showBarcode,
+                        timerKey: _timerKey,
+                        coinAmount: widget.coinAmount,
+                        campaignNames: widget.campaignNames,
+                        onRefresh: _refresh,
+                        onCopy: _copyCode,
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -205,10 +219,14 @@ class _ErrorBody extends StatelessWidget {
   const _ErrorBody({
     required this.message,
     required this.onRetry,
+    this.actionLabel = 'Tekrar Dene',
+    this.actionIcon = Icons.refresh,
   });
 
   final String message;
   final VoidCallback onRetry;
+  final String actionLabel;
+  final IconData actionIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -243,9 +261,9 @@ class _ErrorBody extends StatelessWidget {
           // "Tekrar Dene" outlined pill button
           OutlinedButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh, size: 18, color: AppColors.primary),
+            icon: Icon(actionIcon, size: 18, color: AppColors.primary),
             label: Text(
-              'Tekrar Dene',
+              actionLabel,
               style: AppTextStyles.labelLarge.copyWith(
                 color: AppColors.primary,
               ),

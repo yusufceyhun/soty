@@ -27,6 +27,11 @@ class _PendingTransactionItemState
   Widget build(BuildContext context) {
     final tx = widget.transaction;
     final subItems = tx.subItems ?? const <PendingSubItem>[];
+    final title = subItems.isNotEmpty
+        ? subItems.first.name
+        : tx.orderId != null && tx.orderId!.isNotEmpty
+            ? 'Sipariş #${tx.orderId}'
+            : 'Bekleyen İşlem';
 
     return Container(
       margin: const EdgeInsets.symmetric(
@@ -58,7 +63,7 @@ class _PendingTransactionItemState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Bekleyen İşlem',
+                          title,
                           style: AppTextStyles.titleMedium.copyWith(
                             color: AppColors.textPrimary,
                           ),

@@ -47,9 +47,25 @@ class CampaignCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Brand logo
-                  Image.asset(
-                    'assets/secilstore_logo.png',
-                    height: 32,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: campaign.brandLogoUrl != null &&
+                            campaign.brandLogoUrl!.isNotEmpty
+                        ? Image.network(
+                            campaign.brandLogoUrl!,
+                            height: 32,
+                            width: 88,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                              Icons.storefront_outlined,
+                              color: AppColors.textSecondary,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.storefront_outlined,
+                            color: AppColors.textSecondary,
+                          ),
                   ),
                   // Combinable badge with ⓘ icon
                   Row(
@@ -145,7 +161,9 @@ class CampaignCard extends StatelessWidget {
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
-                        'Geçerlilik: ${DateFormat('dd.MM.yyyy', 'tr_TR').format(campaign.endDate)}',
+                        campaign.endDate.year <= 1
+                            ? 'Geçerlilik: Belirtilmedi'
+                            : 'Geçerlilik: ${DateFormat('dd.MM.yyyy', 'tr_TR').format(campaign.endDate)}',
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),

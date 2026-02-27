@@ -42,11 +42,7 @@ class WalletScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'QR Kod Oluştur',
-            onPressed: () => context.push(AppRoutes.payment, extra: {
-              'coinAmount': 0.0,
-              'campaignIds': <String>[],
-              'campaignNames': <String>[],
-            }),
+            onPressed: () => context.push(AppRoutes.store),
             icon: const Icon(Icons.qr_code, color: AppColors.textPrimary),
           ),
           IconButton(

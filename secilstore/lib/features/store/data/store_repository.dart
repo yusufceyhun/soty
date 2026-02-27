@@ -89,14 +89,25 @@ class StoreRepository {
     final parsed = DateTime.tryParse(raw);
 
     if (parsed == null || parsed.year <= 1) {
-      return DateTime.now().add(const Duration(days: 30));
+      return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
     }
     return parsed;
   }
 
   String? _parseDiscountLabel(Map<String, dynamic> json) {
+    final campaignType = json['campaignType'];
+    final campaignTypeName = campaignType is Map<String, dynamic>
+        ? campaignType['name'] as String?
+        : null;
+    final campaignTypeUpper = json['CampaignType'];
+    final campaignTypeUpperName = campaignTypeUpper is Map<String, dynamic>
+        ? campaignTypeUpper['Name'] as String?
+        : null;
+
     final direct = json['discountLabel'] as String? ??
         json['DiscountLabel'] as String? ??
+        campaignTypeName ??
+        campaignTypeUpperName ??
         json['discountRate'] as String?;
     if (direct != null && direct.trim().isNotEmpty) {
       return direct;

@@ -161,12 +161,12 @@ class WalletRepository {
       final data = response.data as Map<String, dynamic>?;
       if (data == null) {
         return const PendingTransactionsData(
-            items: [], approvalDurationDays: 30);
+            items: [], approvalDurationDays: 0);
       }
 
       final responseData = data['responseData'] ?? data['ResponseData'];
 
-      var approvalDurationDays = 30;
+      var approvalDurationDays = 0;
       List<dynamic> rawBaskets = const [];
 
       if (responseData is List) {
@@ -179,7 +179,7 @@ class WalletRepository {
           approvalDurationDays = _parseInt(
             waitingReward['approveDuration'] ??
                 waitingReward['ApproveDuration'] ??
-                30,
+                0,
           );
           rawBaskets =
               waitingReward['sotierBasketWaitingRewardBaskets'] as List? ??
@@ -191,7 +191,7 @@ class WalletRepository {
           approvalDurationDays = _parseInt(
             responseData['approveDuration'] ??
                 responseData['ApproveDuration'] ??
-                30,
+                0,
           );
           rawBaskets = responseData['transactions'] as List? ??
               responseData['Transactions'] as List? ??
@@ -212,7 +212,7 @@ class WalletRepository {
       return PendingTransactionsData(
         items: items,
         approvalDurationDays:
-            approvalDurationDays > 0 ? approvalDurationDays : 30,
+            approvalDurationDays > 0 ? approvalDurationDays : 0,
       );
     } on AppException {
       rethrow;
@@ -331,7 +331,7 @@ class WalletRepository {
                     '')
                 .toString(),
           ) ??
-          DateTime.now().add(Duration(days: approvalDurationDays)),
+          DateTime.now(),
       orderId: json['orderId'] as String? ??
           json['OrderId'] as String? ??
           json['orderNo'] as String? ??

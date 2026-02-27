@@ -85,7 +85,7 @@ class _TransactionListItemState extends State<TransactionListItem> {
                         Row(
                           children: [
                             Text(
-                              tx.type,
+                              tx.transactionTypeName ?? tx.type,
                               style: AppTextStyles.titleMedium.copyWith(
                                 color: AppColors.textPrimary,
                               ),
