@@ -99,6 +99,9 @@ class StoreScreen extends ConsumerWidget {
                     onPercentageSelected: (pct) => ref
                         .read(storeSelectionNotifierProvider.notifier)
                         .selectCoinPercentage(pct, availableBalance),
+                    onAmountChanged: (amount) => ref
+                        .read(storeSelectionNotifierProvider.notifier)
+                        .setCoinAmount(amount, availableBalance),
                   ),
                   if (selectionState.selectedCampaigns.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.md),

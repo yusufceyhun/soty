@@ -20,6 +20,8 @@ Future<List<Campaign>> activeCampaigns(Ref ref) async {
 
 @riverpod
 class StoreSelectionNotifier extends _$StoreSelectionNotifier {
+  static const _supportedPercentages = <int>[25, 50, 75, 100];
+
   @override
   CampaignSelectionState build() => const CampaignSelectionState();
 
@@ -28,6 +30,19 @@ class StoreSelectionNotifier extends _$StoreSelectionNotifier {
     state = state.copyWith(
       coinPercentage: pct,
       coinAmount: amount,
+    );
+  }
+
+  void setCoinAmount(double rawAmount, double availableBalance) {
+    final clampedAmount = rawAmount.clamp(0, availableBalance).floorToDouble();
+    final matchedPercentage = _supportedPercentages.firstWhere(
+      (pct) => (availableBalance * pct / 100).floorToDouble() == clampedAmount,
+      orElse: () => -1,
+    );
+
+    state = state.copyWith(
+      coinAmount: clampedAmount,
+      coinPercentage: matchedPercentage > 0 ? matchedPercentage : null,
     );
   }
 

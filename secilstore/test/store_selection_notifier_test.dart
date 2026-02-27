@@ -42,8 +42,7 @@ void main() {
 
   group('StoreSelectionNotifier — Campaign Selection', () {
     test('selecting first combinable campaign adds directly, no conflict', () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
       final conflict = notifier.toggleCampaign(combinableA);
 
       expect(conflict, isNull);
@@ -54,17 +53,13 @@ void main() {
     });
 
     test('selecting multiple combinable campaigns adds all, no conflict', () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
       notifier.toggleCampaign(combinableA);
       final conflict = notifier.toggleCampaign(combinableB);
 
       expect(conflict, isNull);
       expect(
-        container
-            .read(storeSelectionNotifierProvider)
-            .selectedCampaigns
-            .length,
+        container.read(storeSelectionNotifierProvider).selectedCampaigns.length,
         2,
       );
     });
@@ -72,8 +67,7 @@ void main() {
     test(
         'selecting non-combinable while combinable(s) selected returns nonCombinableOverCombinables',
         () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
       notifier.toggleCampaign(combinableA);
 
       final conflict = notifier.toggleCampaign(nonCombinable);
@@ -89,8 +83,7 @@ void main() {
     test(
         'selecting combinable while non-combinable selected returns combinableOverNonCombinable',
         () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
       notifier.toggleCampaign(nonCombinable);
 
       final conflict = notifier.toggleCampaign(combinableA);
@@ -105,8 +98,7 @@ void main() {
 
     test('confirmConflictResolution clears all and selects pending campaign',
         () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
       notifier.toggleCampaign(combinableA);
       notifier.toggleCampaign(nonCombinable); // triggers conflict
 
@@ -119,8 +111,7 @@ void main() {
     });
 
     test('cancelConflict leaves state unchanged', () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
       notifier.toggleCampaign(combinableA);
       notifier.toggleCampaign(nonCombinable); // triggers conflict
 
@@ -133,8 +124,7 @@ void main() {
     });
 
     test('deselecting an already-selected campaign removes it', () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
       notifier.toggleCampaign(combinableA);
       notifier.toggleCampaign(combinableB);
 
@@ -148,8 +138,7 @@ void main() {
     });
 
     test('selecting same non-combinable again deselects it', () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
       notifier.toggleCampaign(nonCombinable);
 
       final conflict = notifier.toggleCampaign(nonCombinable); // deselect
@@ -164,8 +153,7 @@ void main() {
 
   group('StoreSelectionNotifier — Coin Percentage', () {
     test('selectCoinPercentage calculates amount correctly', () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
 
       notifier.selectCoinPercentage(25, 50000);
 
@@ -175,14 +163,45 @@ void main() {
     });
 
     test('selectCoinPercentage at 100% returns full balance', () {
-      final notifier =
-          container.read(storeSelectionNotifierProvider.notifier);
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
 
       notifier.selectCoinPercentage(100, 50000);
 
       final state = container.read(storeSelectionNotifierProvider);
       expect(state.coinPercentage, 100);
       expect(state.coinAmount, 50000);
+    });
+
+    test('setCoinAmount sets exact amount and clears percentage when unmatched',
+        () {
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
+
+      notifier.setCoinAmount(73, 100);
+
+      final state = container.read(storeSelectionNotifierProvider);
+      expect(state.coinAmount, 73);
+      expect(state.coinPercentage, isNull);
+    });
+
+    test('setCoinAmount matches percentage when amount equals ratio bucket',
+        () {
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
+
+      notifier.setCoinAmount(50, 100);
+
+      final state = container.read(storeSelectionNotifierProvider);
+      expect(state.coinAmount, 50);
+      expect(state.coinPercentage, 50);
+    });
+
+    test('setCoinAmount clamps amount to available balance', () {
+      final notifier = container.read(storeSelectionNotifierProvider.notifier);
+
+      notifier.setCoinAmount(999, 100);
+
+      final state = container.read(storeSelectionNotifierProvider);
+      expect(state.coinAmount, 100);
+      expect(state.coinPercentage, 100);
     });
   });
 }
